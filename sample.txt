@@ -1,0 +1,11 @@
+나만의 프로필 웹사이트를 만들고 싶어. 다음 정보를 포함해줘:
+- 이름: 홍길동
+- 직업/역할: 프론트엔드 개발자
+- 소개: 나는 개발자 홍길동이다
+- 기술 스택: Java, HTML, CSS, JavaScript
+- 프로젝트/포트폴리오 섹션
+- 연락처: sample@aaa.com
+
+HTML, CSS, JavaScript로 만들고 Tailwind CSS CDN을 사용해줘.
+모던하고 깔끔한 디자인으로 만들어줘.
+
