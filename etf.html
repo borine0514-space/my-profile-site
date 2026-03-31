@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ETF 분석</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="scroll-smooth bg-black text-white">
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full bg-black/80 backdrop-blur-md border-b border-gray-800 z-50">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <a href="index.html" class="text-2xl font-bold bg-gradient-to-r from-purple-400 via-purple-500 to-purple-600 bg-clip-text text-transparent">길동</a>
+                <div class="hidden md:flex gap-8">
+                    <a href="index.html#home" class="text-gray-300 hover:text-white transition font-medium text-sm">Home</a>
+                    <a href="etf.html" class="text-purple-400 font-medium text-sm border-b border-purple-400 pb-0.5">ETF</a>
+                    <a href="index.html#about" class="text-gray-300 hover:text-white transition font-medium text-sm">About</a>
+                    <a href="index.html#skills" class="text-gray-300 hover:text-white transition font-medium text-sm">Skills</a>
+                    <a href="index.html#projects" class="text-gray-300 hover:text-white transition font-medium text-sm">Projects</a>
+                    <a href="index.html#contact" class="text-gray-300 hover:text-white transition font-medium text-sm">Contact</a>
+                </div>
+                <button id="menuBtn" class="md:hidden text-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+            </div>
+            <div id="mobileMenu" class="hidden md:hidden pb-4 bg-black/90">
+                <a href="index.html#home" class="block text-gray-300 hover:text-white py-2 font-medium text-sm">Home</a>
+                <a href="etf.html" class="block text-purple-400 py-2 font-medium text-sm">ETF</a>
+                <a href="index.html#about" class="block text-gray-300 hover:text-white py-2 font-medium text-sm">About</a>
+                <a href="index.html#skills" class="block text-gray-300 hover:text-white py-2 font-medium text-sm">Skills</a>
+                <a href="index.html#projects" class="block text-gray-300 hover:text-white py-2 font-medium text-sm">Projects</a>
+                <a href="index.html#contact" class="block text-gray-300 hover:text-white py-2 font-medium text-sm">Contact</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <section class="pt-28 pb-8 bg-gradient-to-b from-black via-gray-950 to-black">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- ETF Select Box -->
+            <div class="flex items-center gap-4 mb-8">
+                <label class="text-gray-400 text-sm font-medium whitespace-nowrap">ETF 선택</label>
+                <select id="etfSelect"
+                    class="bg-gray-900 border border-gray-700 text-white text-sm rounded-lg px-4 py-2.5 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 cursor-pointer hover:border-gray-600 transition min-w-[200px]">
+                    <option value="DIVO">DIVO</option>
+                    <option value="JEPI" selected>JEPI</option>
+                    <option value="JEPQ">JEPQ</option>
+                    <option value="QQQ">QQQ</option>
+                    <option value="SCHD">SCHD</option>
+                    <option value="SGOV">SGOV</option>
+                    <option value="TLT">TLT</option>
+                    <option value="TLTW">TLTW</option>
+                    <option value="VIG">VIG</option>
+                    <option value="VOO">VOO</option>
+                </select>
+                <div id="loadingSpinner" class="hidden">
+                    <svg class="animate-spin h-5 w-5 text-purple-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Title -->
+            <div class="flex items-center gap-4">
+                <span class="text-4xl">📊</span>
+                <div>
+                    <h1 class="text-4xl md:text-5xl font-bold">
+                        <span id="etfTicker" class="bg-gradient-to-r from-purple-400 to-purple-600 bg-clip-text text-transparent">JEPI</span>
+                        <span class="text-white"> 분석</span>
+                    </h1>
+                    <p class="text-gray-400 mt-1" id="etfFullName">JPMorgan Equity Premium Income ETF</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Key Stats -->
+    <section class="pb-10 bg-black">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
+                    <p class="text-gray-500 text-xs mb-1">현재가 (USD)</p>
+                    <p class="text-2xl font-bold text-white" id="price">--</p>
+                    <p class="text-sm mt-1" id="priceChange">로딩 중...</p>
+                </div>
+                <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
+                    <p class="text-gray-500 text-xs mb-1">배당 수익률</p>
+                    <p class="text-2xl font-bold text-purple-400" id="yield">--</p>
+                    <p class="text-gray-500 text-xs mt-1">연간 (최근 12개월)</p>
+                </div>
+                <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
+                    <p class="text-gray-500 text-xs mb-1">운용보수</p>
+                    <p class="text-2xl font-bold text-white" id="expenseRatio">--</p>
+                    <p class="text-gray-500 text-xs mt-1">연간 비용</p>
+                </div>
+                <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
+                    <p class="text-gray-500 text-xs mb-1">배당 주기</p>
+                    <p class="text-2xl font-bold text-white" id="divFreq">--</p>
+                    <p class="text-gray-500 text-xs mt-1" id="divFreqSub"></p>
+                </div>
+            </div>
+            <p class="text-gray-600 text-xs text-right" id="lastUpdated"></p>
+        </div>
+    </section>
+
+    <!-- Dividend History -->
+    <section class="py-10 bg-black border-t border-gray-800">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-2xl font-bold text-white mb-6">최근 6개월 배당 이력</h2>
+            <div class="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="border-b border-gray-800 bg-gray-900/80">
+                            <th class="text-left px-6 py-4 text-gray-400 font-medium">배당 기준일</th>
+                            <th class="text-right px-6 py-4 text-gray-400 font-medium">배당금 (USD)</th>
+                            <th class="text-right px-6 py-4 text-gray-400 font-medium">배당률</th>
+                            <th class="text-right px-6 py-4 text-gray-400 font-medium">연환산 수익률</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dividendTable">
+                        <tr><td colspan="4" class="text-center py-10 text-gray-500">배당 이력 로딩 중...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="text-gray-600 text-xs mt-3">※ 배당률은 배당 기준일 종가 기준으로 산출됩니다.</p>
+        </div>
+    </section>
+
+    <!-- About ETF -->
+    <section class="py-10 bg-black border-t border-gray-800">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-2xl font-bold text-white mb-6" id="aboutTitle">ETF란?</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-gray-900 border border-gray-800 rounded-xl p-6">
+                    <h3 class="text-lg font-semibold text-purple-400 mb-3">운용 전략</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed" id="aboutStrategy"></p>
+                </div>
+                <div class="bg-gray-900 border border-gray-800 rounded-xl p-6">
+                    <h3 class="text-lg font-semibold text-purple-400 mb-3">주요 특징</h3>
+                    <ul class="text-gray-400 text-sm space-y-2" id="aboutFeatures"></ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Key Issues -->
+    <section class="py-10 bg-black border-t border-gray-800">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-2xl font-bold text-white mb-6">주요 이슈 & 체크포인트</h2>
+            <div class="space-y-4" id="issuesList"></div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-black border-t border-gray-800 text-gray-500 py-8 mt-4">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <p class="text-xs">본 페이지는 투자 권유가 아닌 정보 제공 목적으로 작성되었습니다. 투자 결정은 본인의 판단으로 하시기 바랍니다.</p>
+            <p class="text-xs mt-2">&copy; 2024 홍길동. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // ── ETF 메타 데이터 ──────────────────────────────────────────
+        const ETF_DATA = {
+            DIVO: {
+                fullName: 'Amplify CWP Enhanced Dividend Income ETF',
+                expenseRatio: '0.55%',
+                divFreq: '월배당',
+                divFreqSub: '매월 지급',
+                strategy: 'Amplify ETFs가 운용하는 액티브 커버드콜 ETF입니다. 고배당 우량주(예: AAPL, MSFT, JPM 등)에 집중 투자하면서 선별적 커버드콜을 통해 옵션 프리미엄 수익을 추가합니다. 포지션당 선택적으로 콜옵션을 매도하여 상승 여력을 일부 보존합니다.',
+                features: [
+                    '선별적 커버드콜로 상승 여력 일부 보존',
+                    '고배당 우량주 집중 투자 (약 20~25종목)',
+                    '월배당 지급으로 안정적 현금 흐름',
+                    'JEPI보다 높은 운용보수(0.55%)이나 종목 집중도 높음',
+                ],
+                issues: [
+                    { icon: '⚡', color: 'yellow', title: '집중 포트폴리오 리스크', desc: '약 20~25개 종목에 집중 투자하므로 분산 효과가 낮습니다. 특정 대형주 부진 시 ETF 전체 수익률에 영향이 큽니다.' },
+                    { icon: '📉', color: 'red', title: '강세장 수익률 제한', desc: '커버드콜 전략 특성상 강한 상승장에서 주가 상승이 제한됩니다. 총수익률 기준으로 성장형 ETF 대비 불리할 수 있습니다.' },
+                    { icon: '🏦', color: 'orange', title: '세금 효율성', desc: '옵션 프리미엄 수익은 미국 세법상 일반 소득(Ordinary Income)으로 과세됩니다. 과세 계좌에서 보유 시 세금 부담이 커질 수 있습니다.' },
+                    { icon: '💡', color: 'green', title: '투자 적합 시나리오', desc: '월 현금 흐름을 원하면서도 JEPI보다 주가 상승 참여도를 높이고 싶은 투자자에게 적합합니다. 우량주 중심의 인컴 전략을 선호하는 경우 고려할 수 있습니다.' },
+                ],
+            },
+            JEPI: {
+                fullName: 'JPMorgan Equity Premium Income ETF',
+                expenseRatio: '0.35%',
+                divFreq: '월배당',
+                divFreqSub: '매월 지급',
+                strategy: 'JPMorgan Asset Management이 운용하는 커버드콜 ETF입니다. S&P 500 저변동성 주식에 투자하면서, 동시에 ELN(Equity Linked Note)을 활용한 옵션 프리미엄 수익을 배당으로 지급합니다. 2020년 5월 상장 이후 꾸준한 인기를 얻고 있습니다.',
+                features: [
+                    '매월 배당 지급 (옵션 프리미엄 + 배당 수익)',
+                    'S&P 500 대비 변동성 낮음 (방어적 포트폴리오)',
+                    '운용보수 0.35% (액티브 ETF 대비 낮은 편)',
+                    'AUM $30B+ 이상의 초대형 ETF',
+                ],
+                issues: [
+                    { icon: '⚡', color: 'yellow', title: '배당금 변동성', desc: 'JEPI의 월 배당금은 고정되지 않고 매달 달라집니다. 옵션 프리미엄이 시장 변동성(VIX)에 연동되기 때문에, 변동성이 높은 시장(하락장)에서는 배당이 증가하고, 조용한 상승장에서는 배당이 줄어드는 경향이 있습니다.' },
+                    { icon: '📉', color: 'red', title: '강세장 수익률 제한', desc: '커버드콜 전략 특성상 강세장에서 S&P 500 지수 대비 주가 상승이 제한됩니다. 2023~2024년 강한 상승장에서 SPY 대비 총수익률이 크게 뒤처진 바 있습니다.' },
+                    { icon: '🏦', color: 'orange', title: '세금 효율성 이슈', desc: 'JEPI 배당 수익의 상당 부분은 옵션 프리미엄에서 발생하며, 이는 미국 세법상 일반 소득(Ordinary Income)으로 분류됩니다. 적격 배당(Qualified Dividend)보다 높은 세율이 적용될 수 있습니다.' },
+                    { icon: '📈', color: 'blue', title: 'AUM 규모와 전략 효율성', desc: 'JEPI의 운용자산(AUM)이 급성장하면서 옵션 전략의 효율성이 저하될 수 있다는 우려가 제기됩니다. 옵션 시장 유동성 대비 ETF 규모가 커질수록 목표 수익률 달성이 어려워질 수 있습니다.' },
+                    { icon: '💡', color: 'green', title: '투자 적합 시나리오', desc: 'JEPI는 은퇴 후 현금 흐름이 필요한 투자자, 변동성 완충을 원하는 보수적 투자자에게 적합합니다. 장기 자산 성장이 주 목적이라면 순수 지수 ETF의 총수익률이 우위에 있을 가능성이 높습니다.' },
+                ],
+            },
+            JEPQ: {
+                fullName: 'JPMorgan Nasdaq Equity Premium Income ETF',
+                expenseRatio: '0.35%',
+                divFreq: '월배당',
+                divFreqSub: '매월 지급',
+                strategy: 'JEPI의 나스닥 버전으로, Nasdaq-100 구성종목에 집중 투자하면서 ELN(Equity Linked Note)을 통한 옵션 프리미엄 수익을 월 배당으로 지급합니다. 빅테크(AAPL, MSFT, NVDA 등) 비중이 높아 JEPI보다 변동성이 크지만 높은 배당 수익률을 제공합니다.',
+                features: [
+                    'Nasdaq-100 기반 커버드콜 전략',
+                    'JEPI보다 높은 배당 수익률 (높은 변동성 기반)',
+                    '빅테크 집중 투자로 성장성 일부 보유',
+                    '운용보수 0.35%로 JEPI와 동일',
+                ],
+                issues: [
+                    { icon: '⚡', color: 'yellow', title: '높은 변동성', desc: 'Nasdaq-100 기반 ETF로 S&P 500 기반의 JEPI보다 변동성이 높습니다. 기술주 중심 포트폴리오 특성상 섹터 집중 리스크가 있습니다.' },
+                    { icon: '📉', color: 'red', title: '강세장 수익률 제한', desc: '커버드콜로 인해 나스닥 강세장의 상승분을 모두 누릴 수 없습니다. QQQ 대비 강한 상승장에서 총수익률이 낮을 수 있습니다.' },
+                    { icon: '🏦', color: 'orange', title: '세금 효율성', desc: '옵션 프리미엄 수익 부분이 일반 소득으로 과세됩니다. 기술주 비중이 높아 일반 배당보다 프리미엄 비중이 클 수 있습니다.' },
+                    { icon: '📈', color: 'blue', title: 'JEPI 대비 포지셔닝', desc: 'JEPI(S&P500)보다 공격적인 성격을 지닙니다. 높은 배당과 기술주 노출을 동시에 원하는 투자자에게 적합하며, 두 ETF를 혼합하는 전략도 활용됩니다.' },
+                    { icon: '💡', color: 'green', title: '투자 적합 시나리오', desc: '기술주 성장에 일부 참여하면서 높은 월 현금 흐름을 원하는 투자자에게 적합합니다. 순수 성장보다는 인컴과 기술주 노출의 균형을 추구하는 경우 고려해볼 만합니다.' },
+                ],
+            },
+            QQQ: {
+                fullName: 'Invesco QQQ Trust (Nasdaq-100 ETF)',
+                expenseRatio: '0.20%',
+                divFreq: '분기배당',
+                divFreqSub: '매 분기 지급',
+                strategy: 'Invesco가 운용하는 Nasdaq-100 지수 추종 ETF입니다. 나스닥 상장 비금융 대형주 100종목을 시가총액 가중 방식으로 추종하며, AAPL·MSFT·NVDA·AMZN 등 빅테크가 상위를 차지합니다. 성장 중심 포트폴리오로 배당보다 주가 상승이 주 수익원입니다.',
+                features: [
+                    'Nasdaq-100 지수 그대로 추종 (패시브)',
+                    '빅테크·성장주 집중 (기술 섹터 약 60%)',
+                    '배당 수익률 낮음, 자본 이득 중심',
+                    '일평균 거래량 세계 최고 수준의 유동성',
+                ],
+                issues: [
+                    { icon: '⚡', color: 'yellow', title: '섹터 집중 리스크', desc: '기술 섹터 비중이 60% 이상으로 기술주 하락 시 ETF 전체가 크게 하락합니다. 2022년 기술주 약세장에서 QQQ는 -33% 이상 하락했습니다.' },
+                    { icon: '📉', color: 'red', title: '낮은 배당 수익률', desc: '배당 수익률이 0.5~0.8% 수준으로 매우 낮습니다. 인컴(배당) 목적의 투자자에게는 부적합하며, 자본 이득을 주 목적으로 해야 합니다.' },
+                    { icon: '🏦', color: 'orange', title: '고평가 리스크', desc: '성장주 중심 포트폴리오 특성상 P/E 등 밸류에이션이 S&P 500 대비 높습니다. 금리 상승 국면에서 성장주 할인율이 커져 낙폭이 심화될 수 있습니다.' },
+                    { icon: '📈', color: 'blue', title: '장기 성과', desc: '장기적으로 S&P 500(VOO)을 크게 웃도는 성과를 기록해왔습니다. 단, 변동성도 높아 심리적으로 버티기 어려운 구간이 존재합니다.' },
+                    { icon: '💡', color: 'green', title: '투자 적합 시나리오', desc: '기술주 장기 성장에 베팅하는 공격적 투자자에게 적합합니다. 배당보다 자본 이득을 선호하고, 높은 변동성을 감내할 수 있는 장기 투자자에게 추천됩니다.' },
+                ],
+            },
+            SCHD: {
+                fullName: 'Schwab US Dividend Equity ETF',
+                expenseRatio: '0.06%',
+                divFreq: '분기배당',
+                divFreqSub: '매 분기 지급',
+                strategy: 'Charles Schwab이 운용하는 고배당 ETF입니다. Dow Jones U.S. Dividend 100 Index를 추종하며, 10년 이상 배당을 지속한 기업 중 재무 건전성·배당 성장률·수익성을 기준으로 100종목을 선별합니다. 배당 성장에 초점을 맞춘 고품질 인컴 ETF입니다.',
+                features: [
+                    '10년 이상 배당 지속 기업만 편입 (배당 안정성)',
+                    '운용보수 0.06%로 업계 최저 수준',
+                    '적격 배당(Qualified Dividend) 비중이 높아 세금 효율 우수',
+                    '배당 성장주 중심 (매년 배당 인상 기업)',
+                ],
+                issues: [
+                    { icon: '⚡', color: 'yellow', title: '기술주 비중 낮음', desc: '배당을 지급하지 않는 고성장 기술주(AMZN 등)는 편입 제외됩니다. 기술주 강세장에서 QQQ·VOO 대비 부진할 수 있습니다.' },
+                    { icon: '📈', color: 'blue', title: '배당 성장의 복리 효과', desc: '매년 배당이 꾸준히 증가하는 기업 중심으로 구성되어, 장기 보유 시 매입 단가 대비 배당 수익률(YoC)이 크게 높아지는 복리 효과를 기대할 수 있습니다.' },
+                    { icon: '🏦', color: 'orange', title: '금리 민감도', desc: '배당주 전반은 금리 상승 시 채권 대비 매력이 줄어들어 주가가 하락하는 경향이 있습니다. SCHD도 금리 급등 구간에서 S&P 500 대비 약세를 보인 사례가 있습니다.' },
+                    { icon: '📉', color: 'red', title: '섹터 편중', desc: '금융·헬스케어·산업재 비중이 높고, 기술 섹터 비중이 낮습니다. 특정 섹터 약세 시 집중적 영향을 받을 수 있습니다.' },
+                    { icon: '💡', color: 'green', title: '투자 적합 시나리오', desc: '장기 배당 성장과 세금 효율적 인컴을 동시에 원하는 투자자에게 최적입니다. 은퇴 준비 중이거나 배당 재투자(DRIP) 전략을 구사하는 장기 투자자에게 특히 추천됩니다.' },
+                ],
+            },
+            SGOV: {
+                fullName: 'iShares 0-3 Month Treasury Bond ETF',
+                expenseRatio: '0.09%',
+                divFreq: '월배당',
+                divFreqSub: '매월 지급',
+                strategy: 'BlackRock이 운용하는 초단기 미국 국채 ETF입니다. 잔존만기 0~3개월의 미국 재무부 국채(T-Bills)에 투자하며, 원금 변동이 거의 없는 현금 대용 상품입니다. 금리 변동 리스크가 극히 낮아 파킹용·안전자산으로 활용됩니다.',
+                features: [
+                    '원금 변동 거의 없음 (Duration ~0.1년)',
+                    '미국 국채 직접 투자 → 신용 리스크 최소',
+                    '월배당 지급으로 이자 현금화 편리',
+                    '머니마켓펀드(MMF) 대체재로 활용',
+                ],
+                issues: [
+                    { icon: '⚡', color: 'yellow', title: '금리 하락 시 수익률 감소', desc: '수익률이 기준금리(Fed Funds Rate)에 거의 연동됩니다. 연준이 금리를 인하하면 배당 수익률도 즉시 낮아집니다. 금리 고점에서 매력이 극대화되고, 인하 사이클에서는 수익률이 빠르게 하락합니다.' },
+                    { icon: '📉', color: 'red', title: '인플레이션 헤지 미흡', desc: '명목 수익률은 기준금리 수준이지만, 인플레이션이 그 이상이면 실질 수익률은 마이너스가 됩니다. 인플레이션 헤지 목적이라면 TIPS가 더 적합합니다.' },
+                    { icon: '🏦', color: 'orange', title: '과세 문제', desc: '이자 수익은 연방세 과세 대상이나 주(州)세는 면제됩니다. 미국 비거주자(한국 투자자) 기준으로는 이자소득세 15%(한미조세협약)가 원천징수됩니다.' },
+                    { icon: '📈', color: 'blue', title: '현금 대체 수단으로 활용', desc: '주식시장 불확실성이 높을 때 현금 대신 보유하면서 기준금리 수준의 이자를 챙기는 파킹 전략으로 널리 활용됩니다. 2023~2024년 고금리 환경에서 5%대 수익률을 제공해 큰 인기를 끌었습니다.' },
+                    { icon: '💡', color: 'green', title: '투자 적합 시나리오', desc: '단기 자금 운용, 투자 대기 자금 파킹, 포트폴리오 내 안전자산 비중 확보 목적에 적합합니다. 리스크를 최소화하면서 기준금리 수준의 수익을 원하는 보수적 투자자에게 추천됩니다.' },
+                ],
+            },
+            TLT: {
+                fullName: 'iShares 20+ Year Treasury Bond ETF',
+                expenseRatio: '0.15%',
+                divFreq: '월배당',
+                divFreqSub: '매월 지급',
+                strategy: 'BlackRock이 운용하는 장기 미국 국채 ETF입니다. 잔존만기 20년 이상의 미국 재무부 장기채를 추종하며, 듀레이션이 약 17~18년으로 금리 변동에 매우 민감합니다. 금리 하락 시 큰 자본 이득, 금리 상승 시 큰 자본 손실이 발생합니다.',
+                features: [
+                    '미국 장기 국채 직접 투자 (신용 리스크 없음)',
+                    '듀레이션 약 17~18년 → 금리 민감도 최고',
+                    '월배당으로 이자 수익 지급',
+                    '주식과 음의 상관관계 (전통적 헤지 자산)',
+                ],
+                issues: [
+                    { icon: '⚡', color: 'yellow', title: '금리 상승 리스크', desc: '금리가 1% 상승하면 TLT 가격은 약 17~18% 하락합니다. 2022년 급격한 금리 인상 사이클에서 TLT는 -40% 이상 폭락했습니다. 금리 방향성에 대한 판단이 매우 중요합니다.' },
+                    { icon: '📉', color: 'red', title: '역사적 최악의 낙폭', desc: '2020~2023년 구간에서 TLT는 주식보다 더 큰 낙폭을 기록했습니다. 장기채는 전통적 안전자산이지만, 인플레이션·금리 급등 환경에서는 매우 위험한 자산이 될 수 있습니다.' },
+                    { icon: '🏦', color: 'orange', title: '인플레이션 헤지 불가', desc: '고정 이자율 채권이므로 인플레이션 상승 시 실질 수익률이 크게 훼손됩니다. 인플레이션 국면에서는 TIPS 또는 단기채(SGOV)가 더 유리합니다.' },
+                    { icon: '📈', color: 'blue', title: '금리 하락기 강력한 수익', desc: '연준이 금리 인하 사이클에 진입하면 TLT는 강력한 자본 이득을 제공합니다. 경기 침체 시 안전자산 수요 증가로 주식과 반대 방향으로 움직이는 경향이 있어 포트폴리오 헤지 용도로 활용됩니다.' },
+                    { icon: '💡', color: 'green', title: '투자 적합 시나리오', desc: '금리 피크아웃 및 하락을 예상하는 투자자, 포트폴리오 내 주식 리스크를 헤지하려는 투자자에게 적합합니다. 단기 트레이딩보다는 금리 사이클 전환점에서의 전략적 접근이 중요합니다.' },
+                ],
+            },
+            TLTW: {
+                fullName: 'iShares 20+ Year Treasury Bond BuyWrite Strategy ETF',
+                expenseRatio: '0.35%',
+                divFreq: '월배당',
+                divFreqSub: '매월 지급',
+                strategy: 'BlackRock이 운용하는 장기 국채 커버드콜 ETF입니다. TLT(20년+ 미국 장기채)를 기초자산으로 보유하면서, 매월 TLT 콜옵션을 매도하여 옵션 프리미엄을 추가 수익으로 배당 지급합니다. TLT보다 높은 배당 수익률을 제공하나 상승 여력이 제한됩니다.',
+                features: [
+                    'TLT + 커버드콜로 배당 수익률 극대화',
+                    'TLT 대비 2~3배 높은 배당 수익률',
+                    '월배당으로 정기적 현금 흐름 제공',
+                    '장기채 특성상 금리 민감도 여전히 높음',
+                ],
+                issues: [
+                    { icon: '⚡', color: 'yellow', title: '금리 상승 이중 타격', desc: '기초자산인 TLT가 금리 상승에 취약하고, 커버드콜로 인한 상승 참여도 제한됩니다. 금리가 오르면 TLT 가격 하락 + 콜옵션 가치 감소로 이중으로 불리한 상황이 됩니다.' },
+                    { icon: '📉', color: 'red', title: '상승 시 캡 구조', desc: '금리 급락(TLT 급등) 시 콜옵션 매도로 인해 상승분의 일부만 누릴 수 있습니다. TLT 투자자 대비 금리 하락의 수혜가 제한됩니다.' },
+                    { icon: '🏦', color: 'orange', title: '높은 배당의 세금 부담', desc: '옵션 프리미엄 수익이 일반 소득으로 과세됩니다. TLT의 이자 소득과 합산되면 세금 부담이 커질 수 있어 절세 계좌 활용이 권장됩니다.' },
+                    { icon: '📈', color: 'blue', title: 'TLT 대비 장단점', desc: '금리 하락 국면: TLT > TLTW (상승 캡으로 수익 제한). 횡보·하락 국면: TLTW > TLT (옵션 프리미엄으로 손실 일부 보전). 높은 배당이 필요한 횡보장에서 TLTW가 유리합니다.' },
+                    { icon: '💡', color: 'green', title: '투자 적합 시나리오', desc: '장기채에 투자하되 높은 월 현금 흐름을 원하는 투자자에게 적합합니다. 금리 방향에 확신이 없지만 채권 인컴을 원할 때, 또는 금리 횡보 구간에서 TLT보다 유리한 대안으로 고려됩니다.' },
+                ],
+            },
+            VIG: {
+                fullName: 'Vanguard Dividend Appreciation ETF',
+                expenseRatio: '0.06%',
+                divFreq: '분기배당',
+                divFreqSub: '매 분기 지급',
+                strategy: 'Vanguard가 운용하는 배당 성장 ETF입니다. S&P U.S. Dividend Growers Index를 추종하며, 최소 10년 연속 배당을 인상한 기업을 선별합니다. 현재 배당 수익률보다 배당 성장에 초점을 맞추며, SCHD보다 기술주 비중이 높아 성장성도 겸비합니다.',
+                features: [
+                    '10년 이상 연속 배당 인상 기업만 편입',
+                    '운용보수 0.06%로 초저비용',
+                    'SCHD보다 기술주 비중 높음 (MSFT, AAPL 등 포함)',
+                    '약 300여 종목으로 폭넓은 분산',
+                ],
+                issues: [
+                    { icon: '⚡', color: 'yellow', title: '현재 배당 수익률 낮음', desc: '배당 성장 중심으로 현재 배당 수익률은 1.5~2% 수준으로 낮습니다. 즉각적인 인컴 확보보다 장기 배당 성장의 복리 효과를 기대하는 투자자에게 적합합니다.' },
+                    { icon: '📈', color: 'blue', title: '배당 성장의 복리 효과', desc: '편입 기업들은 경기 침체에서도 배당을 유지·인상해온 검증된 기업들입니다. 장기 보유 시 매입 단가 대비 배당 수익률(YoC)이 꾸준히 높아지는 복리 효과를 기대할 수 있습니다.' },
+                    { icon: '🏦', color: 'orange', title: 'SCHD와의 비교', desc: 'SCHD는 현재 배당 수익률이 높고 금융·가치주 비중이 높은 반면, VIG는 기술주 포함으로 성장성이 더 높습니다. 두 ETF를 혼합하는 포트폴리오 전략이 많이 활용됩니다.' },
+                    { icon: '📉', color: 'red', title: '배당 삭감 기업 편출', desc: '배당을 삭감하거나 인상을 중단한 기업은 지수에서 자동 제외됩니다. 재편입 비용과 타이밍 문제가 발생할 수 있으나, 장기적으로 품질 필터 역할을 합니다.' },
+                    { icon: '💡', color: 'green', title: '투자 적합 시나리오', desc: '배당 성장을 통한 장기 자산 증식을 원하는 투자자에게 최적입니다. 현재 배당보다 미래 배당 성장의 복리 효과를 기대하며, 품질 높은 기업의 분산 투자를 원하는 장기 투자자에게 추천됩니다.' },
+                ],
+            },
+            VOO: {
+                fullName: 'Vanguard S&P 500 ETF',
+                expenseRatio: '0.03%',
+                divFreq: '분기배당',
+                divFreqSub: '매 분기 지급',
+                strategy: 'Vanguard가 운용하는 S&P 500 지수 추종 ETF입니다. 미국 대형주 500종목을 시가총액 가중 방식으로 편입하며, 운용보수 0.03%로 세계 최저 수준입니다. 장기 투자의 표준 벤치마크로 널리 사용되며, 워런 버핏이 추천한 ETF로도 유명합니다.',
+                features: [
+                    'S&P 500 지수 완전 복제 (패시브 전략)',
+                    '운용보수 0.03%로 업계 최저 수준',
+                    '미국 대형주 500종목 분산 투자',
+                    'AUM $1조 이상의 세계 최대 규모 ETF 중 하나',
+                ],
+                issues: [
+                    { icon: '⚡', color: 'yellow', title: '낮은 배당 수익률', desc: '배당 수익률이 1.3~1.5% 수준으로 인컴 투자 목적으로는 부족합니다. 배당보다 주가 상승(자본 이득)이 주 수익원입니다.' },
+                    { icon: '📈', color: 'blue', title: '장기 성과의 표준', desc: '장기적으로 대부분의 액티브 펀드를 이깁니다. 지난 30년간 연평균 10~11% 수익률을 기록했으며, 재투자 시 복리 효과가 강력합니다.' },
+                    { icon: '🏦', color: 'orange', title: '시가총액 집중 리스크', desc: '시가총액 가중 방식으로 상위 10개 종목이 전체의 30% 이상을 차지합니다. 빅테크(AAPL·MSFT·NVDA 등) 의존도가 높아 이 종목들의 부진 시 ETF 전체에 영향이 큽니다.' },
+                    { icon: '📉', color: 'red', title: '시장 전체 하락에 그대로 노출', desc: 'S&P 500이 하락하면 VOO도 그대로 하락합니다. 2022년에 -18%, 2008년에 -37% 하락했습니다. 하락장에서 개별 종목 선택으로 방어하는 것이 불가능합니다.' },
+                    { icon: '💡', color: 'green', title: '투자 적합 시나리오', desc: '미국 경제 성장에 장기 베팅하는 모든 투자자에게 기본 포트폴리오로 적합합니다. 복잡한 전략 없이 단순하게 미국 주식 시장 전체에 투자하고 싶은 장기·패시브 투자자에게 최우선 추천됩니다.' },
+                ],
+            },
+        };
+
+        const ISSUE_COLORS = {
+            yellow: 'hover:border-yellow-500/50',
+            red: 'hover:border-red-500/50',
+            orange: 'hover:border-orange-500/50',
+            blue: 'hover:border-blue-500/50',
+            green: 'hover:border-green-500/50',
+        };
+        const ISSUE_TEXT_COLORS = {
+            yellow: 'text-yellow-400',
+            red: 'text-red-400',
+            orange: 'text-orange-400',
+            blue: 'text-blue-400',
+            green: 'text-green-400',
+        };
+
+        // ── DOM 업데이트 ──────────────────────────────────────────────
+        function updateStaticInfo(ticker) {
+            const info = ETF_DATA[ticker];
+            document.getElementById('etfTicker').textContent = ticker;
+            document.getElementById('etfFullName').textContent = info.fullName;
+            document.getElementById('expenseRatio').textContent = info.expenseRatio;
+            document.getElementById('divFreq').textContent = info.divFreq;
+            document.getElementById('divFreqSub').textContent = info.divFreqSub;
+            document.getElementById('aboutTitle').textContent = `${ticker}란?`;
+            document.getElementById('aboutStrategy').textContent = info.strategy;
+            document.getElementById('aboutFeatures').innerHTML = info.features.map(f => `
+                <li class="flex items-start gap-2">
+                    <span class="text-purple-400 mt-0.5">▸</span>
+                    <span>${f}</span>
+                </li>
+            `).join('');
+            document.getElementById('issuesList').innerHTML = info.issues.map(issue => `
+                <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 ${ISSUE_COLORS[issue.color]} transition">
+                    <div class="flex items-start gap-4">
+                        <span class="text-2xl">${issue.icon}</span>
+                        <div>
+                            <h3 class="font-semibold ${ISSUE_TEXT_COLORS[issue.color]} mb-2">${issue.title}</h3>
+                            <p class="text-gray-400 text-sm leading-relaxed">${issue.desc}</p>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            document.title = `ETF 분석 - ${ticker}`;
+        }
+
+        function resetDynamic() {
+            document.getElementById('price').textContent = '--';
+            document.getElementById('priceChange').textContent = '로딩 중...';
+            document.getElementById('priceChange').className = 'text-sm mt-1 text-gray-400';
+            document.getElementById('yield').textContent = '--';
+            document.getElementById('lastUpdated').textContent = '';
+            document.getElementById('dividendTable').innerHTML =
+                '<tr><td colspan="4" class="text-center py-10 text-gray-500">배당 이력 로딩 중...</td></tr>';
+        }
+
+        // ── 데이터 fetch ──────────────────────────────────────────────
+        function formatDate(timestamp) {
+            return new Date(timestamp * 1000).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+        }
+
+        const fetchWithTimeout = async (url, ms = 6000) => {
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), ms);
+            try {
+                return await fetch(url, { signal: controller.signal });
+            } finally {
+                clearTimeout(timer);
+            }
+        };
+
+        async function fetchETFData(ticker) {
+            try {
+                const apiUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=1y&events=div`;
+                const proxies = [
+                    'https://corsproxy.io/?url=' + encodeURIComponent(apiUrl),
+                    'https://api.allorigins.win/get?url=' + encodeURIComponent(apiUrl),
+                    'https://thingproxy.freeboard.io/fetch/' + apiUrl,
+                ];
+
+                let data = null;
+                for (const proxyUrl of proxies) {
+                    try {
+                        const response = await fetchWithTimeout(proxyUrl, 6000);
+                        if (!response.ok) continue;
+                        const raw = await response.json();
+                        // allorigins wraps response in { contents: "..." }
+                        data = raw.contents ? JSON.parse(raw.contents) : raw;
+                        if (data?.chart?.result?.[0]) break;
+                    } catch (e) {
+                        continue;
+                    }
+                }
+                if (!data?.chart?.result?.[0]) throw new Error('모든 프록시에서 데이터를 가져오지 못했습니다.');
+
+                const result = data.chart.result[0];
+                const meta = result.meta;
+                const dividends = result.events?.dividends || {};
+
+                // 현재가
+                const currentPrice = meta.regularMarketPrice;
+                // 차트 데이터에서 전일 종가 추출 (meta 필드보다 신뢰도 높음)
+                const closes = result.indicators?.quote?.[0]?.close ?? [];
+                const validCloses = closes.filter(v => v != null);
+                const prevClose = validCloses.length >= 2
+                    ? validCloses[validCloses.length - 2]
+                    : (meta.regularMarketPreviousClose ?? meta.chartPreviousClose);
+                const priceChange = currentPrice - prevClose;
+                const priceChangePct = (priceChange / prevClose) * 100;
+
+                document.getElementById('price').textContent = `$${currentPrice.toFixed(2)}`;
+                const changeEl = document.getElementById('priceChange');
+                if (priceChange >= 0) {
+                    changeEl.textContent = `▲ $${priceChange.toFixed(2)} (+${priceChangePct.toFixed(2)}%)`;
+                    changeEl.className = 'text-sm mt-1 text-green-400';
+                } else {
+                    changeEl.textContent = `▼ $${Math.abs(priceChange).toFixed(2)} (${priceChangePct.toFixed(2)}%)`;
+                    changeEl.className = 'text-sm mt-1 text-red-400';
+                }
+
+                // 배당 수익률 (최근 12개월)
+                const divEntries = Object.values(dividends).sort((a, b) => b.date - a.date);
+                const oneYearAgo = Date.now() / 1000 - 365 * 24 * 3600;
+                const last12 = divEntries.filter(d => d.date >= oneYearAgo);
+                const annualDiv = last12.reduce((sum, d) => sum + d.amount, 0);
+                const annualYield = (annualDiv / currentPrice) * 100;
+                document.getElementById('yield').textContent = annualYield > 0 ? `${annualYield.toFixed(2)}%` : '--';
+
+                // 최근 6개월 배당 이력
+                const sixMonthsAgo = Date.now() / 1000 - 183 * 24 * 3600;
+                const last6m = divEntries.filter(d => d.date >= sixMonthsAgo);
+
+                const divFreq = ETF_DATA[ticker]?.divFreq ?? '';
+                const freqMultiplier =
+                    divFreq === '월배당'   ? 12 :
+                    divFreq === '분기배당' ? 4  :
+                    divFreq === '반기배당' ? 2  :
+                    1;
+
+                const tbody = document.getElementById('dividendTable');
+                if (last6m.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" class="text-center py-10 text-gray-500">최근 6개월 내 배당 지급 이력이 없습니다.</td></tr>';
+                } else {
+                    tbody.innerHTML = last6m.map((div, i) => {
+                        const paymentYield = (div.amount / currentPrice) * 100;
+                        const annualized = paymentYield * freqMultiplier;
+                        return `
+                            <tr class="border-b border-gray-800/50 ${i % 2 !== 0 ? 'bg-gray-900/30' : ''} hover:bg-purple-500/5 transition">
+                                <td class="px-6 py-4 text-gray-300">${formatDate(div.date)}</td>
+                                <td class="px-6 py-4 text-right font-mono text-white">$${div.amount.toFixed(4)}</td>
+                                <td class="px-6 py-4 text-right font-mono text-purple-300">${paymentYield.toFixed(3)}%</td>
+                                <td class="px-6 py-4 text-right font-mono text-purple-400 font-semibold">${annualized.toFixed(2)}%</td>
+                            </tr>`;
+                    }).join('');
+                }
+
+                document.getElementById('lastUpdated').textContent =
+                    `마지막 업데이트: ${new Date().toLocaleString('ko-KR')} (Yahoo Finance 기준)`;
+
+            } catch (err) {
+                console.error('데이터 로드 실패:', err);
+                document.getElementById('price').textContent = '--';
+                document.getElementById('priceChange').textContent = '데이터 로드 실패';
+                document.getElementById('priceChange').className = 'text-sm mt-1 text-red-400';
+                document.getElementById('yield').textContent = '--';
+                document.getElementById('dividendTable').innerHTML = `
+                    <tr><td colspan="4" class="text-center py-10 text-gray-500">
+                        <p>Yahoo Finance API 로드에 실패했습니다.</p>
+                        <p class="text-xs mt-2">잠시 후 다시 시도해주세요.</p>
+                        <button onclick="loadETF(document.getElementById('etfSelect').value)"
+                            class="mt-3 px-4 py-1.5 text-xs bg-purple-600 hover:bg-purple-500 text-white rounded-lg transition">
+                            다시 시도
+                        </button>
+                    </td></tr>`;
+                document.getElementById('lastUpdated').textContent = '데이터를 불러올 수 없습니다.';
+            }
+        }
+
+        // ── 초기화 & 이벤트 ──────────────────────────────────────────
+        const etfSelect = document.getElementById('etfSelect');
+        const spinner = document.getElementById('loadingSpinner');
+
+        async function loadETF(ticker) {
+            spinner.classList.remove('hidden');
+            updateStaticInfo(ticker);
+            resetDynamic();
+            await fetchETFData(ticker);
+            spinner.classList.add('hidden');
+        }
+
+        etfSelect.addEventListener('change', () => loadETF(etfSelect.value));
+
+        // Mobile menu
+        document.getElementById('menuBtn').addEventListener('click', () => {
+            document.getElementById('mobileMenu').classList.toggle('hidden');
+        });
+
+        // 초기 로드
+        loadETF('JEPI');
+    </script>
+</body>
+</html>
